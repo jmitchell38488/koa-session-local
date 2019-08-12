@@ -89,5 +89,5 @@ session is a rolling session, force save session, or otherwise.
 [npm]: https://www.npmjs.com/
 [yarn]: https://yarnpkg.com/
 
-[contrib-jmitchell38488]: https://en.gravatar.com/userimage/111127134/56b96d8b7d904e5698494597938da449.jpg?size=60
+[contrib-jmitchell38488]: https://avatars1.githubusercontent.com/u/12840052?s=60
 [contrib-jmitchell38488-url]: https://github.com/jmitchell38488
