@@ -9,8 +9,31 @@
 
 /**
  * The LocalSessionStore class is a simple implementation for the Koa Session manager to store sessions in memory.
+ *
+ * Sessions are stored locally inside of the instance of the LocalSessionStore with the following structure:
+ * {
+ *     created: Date.now(),
+ *     key: string,
+ *     json: {
+ *         ... ,
+ *         _expire: number,
+ *         _maxAge: number,
+ *         ?_session: boolean
+ *     },
+ *     ttl: number
+ * }
+ *
+ * Options that are passed from the koa-session class:
+ * {
+ *     ?renew: boolean,
+ *     ?force: boolean,
+ *     ?changed: boolean,
+ *     ?maxAge: number,
+ *     rolling: boolean
+ * }
  */
 class LocalSessionStore {
+
 
     constructor() {
         // Initialize our sessions container
@@ -24,8 +47,16 @@ class LocalSessionStore {
      * @param opts Options
      * @returns {Promise<*>} A promise containing the session or null
      */
-    async get(key, ttl, opts) { // eslint-disable-line
+    // eslint-disable-next-line
+    async get(key, ttl, opts) {
         const session = this.sessions.find(t => t.key === key);
+
+        // Session-length session does not expire
+        if (session && session.json._session) {
+            return session.json;
+        }
+
+        // Check that the session hasn't already expired
         return (session && session.json._expire > Date.now()) ? session.json : null;
     }
 
@@ -38,15 +69,7 @@ class LocalSessionStore {
      * @returns {Promise<void>} An empty promise that resolves on success, or failure on error
      */
     async set(key, json, ttl, opts) {
-        // Renew means we generate a new session with the same key
-        // Force saving a new session no matter what
-        if (opts.renew || opts.force) {
-            await this.destroy(key);
-            this.sessions.push(LocalSessionStore.getNewSessionEntry(key, json, ttl));
-            return;
-        }
-
-        // Changed means we just update
+        // Changed means we just update, or create a new session
         if (opts.changed || opts.rolling) {
             let session = this.sessions.find(t => t.key === key) || false;
             if (!session) {
@@ -56,8 +79,18 @@ class LocalSessionStore {
 
             session.ttl = ttl;
             session.json = json;
+            return;
         }
 
+        // Renew means we generate a new session with the same key
+        // Force saving a new session no matter what
+        if (opts.renew || opts.force) {
+            await this.destroy(key);
+            this.sessions.push(LocalSessionStore.getNewSessionEntry(key, json, ttl));
+            return;
+        }
+
+        // Wait, what happened?!
         throw 'Cannot resolve session';
     }
 
@@ -84,6 +117,14 @@ class LocalSessionStore {
             json: json,
             ttl: ttl
         }
+    }
+
+    /**
+     * Get the number of sessions that have been created, this does not determine those sessions that need to be pruned
+     * @returns {number}
+     */
+    get size() {
+        return this.sessions.length;
     }
 
 }
