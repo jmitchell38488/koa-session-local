@@ -1,0 +1,36 @@
+{
+  "name": "@jmitchell38488/koa-session-local",
+  "version": "1.0.0",
+  "description": "Local session storage for Koa sessions",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "jmitchell38488/koa-session-local",
+  "keywords": [
+    "cache",
+    "caching",
+    "session",
+    "local",
+    "store",
+    "koa",
+    "express",
+    "middleware",
+    "node",
+    "nodes",
+    "session",
+    "storage"
+  ],
+  "author": "Justin Mitchell <jmitchell38488@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jmitchell38488/koa-session-local/issues"
+  },
+  "homepage": "https://github.com/jmitchell38488/koa-session-local",
+  "contributors": [
+    "Justin Mitchell <jmitchell38488@gmail.com>"
+  ],
+  "engines": {
+    "node": ">= 7.6"
+  }
+}
