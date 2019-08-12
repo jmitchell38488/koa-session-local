@@ -24,7 +24,7 @@ class LocalSessionStore {
      * @param opts Options
      * @returns {Promise<*>} A promise containing the session or null
      */
-    async get(key, ttl, opts) {
+    async get(key, ttl, opts) { // eslint-disable-line
         const session = this.sessions.find(t => t.key === key);
         return (session && session.json._expire > Date.now()) ? session.json : null;
     }
@@ -42,7 +42,7 @@ class LocalSessionStore {
         // Force saving a new session no matter what
         if (opts.renew || opts.force) {
             await this.destroy(key);
-            this.sessions.push(SessionStore.getNewSessionEntry(key, json, ttl));
+            this.sessions.push(LocalSessionStore.getNewSessionEntry(key, json, ttl));
             return;
         }
 
@@ -50,7 +50,7 @@ class LocalSessionStore {
         if (opts.changed || opts.rolling) {
             let session = this.sessions.find(t => t.key === key) || false;
             if (!session) {
-                this.sessions.push(SessionStore.getNewSessionEntry(key, json, ttl));
+                this.sessions.push(LocalSessionStore.getNewSessionEntry(key, json, ttl));
                 return;
             }
 

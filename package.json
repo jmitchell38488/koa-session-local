@@ -2,8 +2,9 @@
   "name": "@jmitchell38488/koa-session-local",
   "version": "1.0.0",
   "description": "Local session storage for Koa sessions",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
+    "lint": "eslint src",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": "jmitchell38488/koa-session-local",
@@ -32,5 +33,14 @@
   ],
   "engines": {
     "node": ">= 7.6"
+  },
+  "devDependencies": {
+    "co-mocha": "^1.2.2",
+    "eslint": "^6.1.0",
+    "eslint-plugin-node": "^9.1.0",
+    "istanbul": "^0.4.5",
+    "lint-staged": "^9.2.1",
+    "mocha": "^6.2.0",
+    "should": "^13.2.3"
   }
 }
