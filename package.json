@@ -1,5 +1,5 @@
 {
-  "name": "@jmitchell38488/koa-session-local",
+  "name": "koa-session-local",
   "version": "1.0.0",
   "description": "Local session storage for Koa sessions",
   "main": "src/index.js",

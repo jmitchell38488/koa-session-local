@@ -9,7 +9,7 @@
 
 >Local session storage for Koa sessions using async/await
 
-[![NPM](https://nodei.co/npm/koa-local-session.svg?downloads=true)](https://nodei.co/npm/koa-local-session/)
+[![NPM](https://nodei.co/npm/koa-session-local.svg?downloads=true)](https://nodei.co/npm/koa-session-local/)
 
 ## Table of Contents
 
@@ -25,17 +25,17 @@
 [npm][]:
 
 ```sh
-npm install koa-local-session
+npm install koa-session-local
 ```
 
 [yarn][]:
 
 ```sh
-yarn add koa-local-session
+yarn add koa-session-local
 ```
 
 ## Usage
-`koa-local-session` works with [koa-session](https://github.com/koajs/session) (a simple session middleware for Koa), 
+`koa-session-local` works with [koa-session](https://github.com/koajs/session) (a simple session middleware for Koa), 
 and requires Node >= 7.6 for async/await support.
 
 ### Basic
@@ -43,7 +43,7 @@ and requires Node >= 7.6 for async/await support.
 ```js
 const koa = require('koa');
 const session = require('koa-session');
-const store = require('koa-local-session');
+const store = require('koa-session-local');
 
 const app = koa();
 app.keys = ['keys', 'keykeys'];
@@ -74,18 +74,18 @@ session is a rolling session, force save session, or otherwise.
 
 [![contrib-jmitchell38488]][contrib-jmitchell38488-url]
 
-[npm-image]: https://img.shields.io/npm/v/koa-local-session.svg?style=flat-square
-[npm-url]: https://npmjs.org/package/koa-local-session
-[travis-image]: https://img.shields.io/travis/jmitchell38488/koa-local-session
-[travis-url]: https://travis-ci.org/jmitchell38488/koa-local-session
-[david-image]: https://img.shields.io/david/jmitchell38488/koa-local-session.svg?style=flat-square
-[david-url]: https://david-dm.org/jmitchell38488/koa-local-session
-[david-dev-image]: https://img.shields.io/david/dev/jmitchell38488/koa-local-session.svg?style=flat-square&label=devDeps
-[david-dev-url]: https://david-dm.org/jmitchell38488/koa-local-session#info=devDependencies
+[npm-image]: https://img.shields.io/npm/v/koa-session-local.svg?style=flat-square
+[npm-url]: https://npmjs.org/package/koa-session-local
+[travis-image]: https://img.shields.io/travis/jmitchell38488/koa-session-local
+[travis-url]: https://travis-ci.com/jmitchell38488/koa-session-local
+[david-image]: https://img.shields.io/david/jmitchell38488/koa-session-local.svg?style=flat-square
+[david-url]: https://david-dm.org/jmitchell38488/koa-session-local
+[david-dev-image]: https://img.shields.io/david/dev/jmitchell38488/koa-session-local.svg?style=flat-square&label=devDeps
+[david-dev-url]: https://david-dm.org/jmitchell38488/koa-session-local#info=devDependencies
 [node-image]: https://img.shields.io/badge/node.js-%3E=_7.6-green.svg?style=flat-square
 [node-url]: http://nodejs.org/download/
-[download-image]: https://img.shields.io/npm/dm/koa-local-session.svg?style=flat-square
-[download-url]: https://npmjs.org/jmitchell38488/koa-local-session
+[download-image]: https://img.shields.io/npm/dm/koa-session-local.svg?style=flat-square
+[download-url]: https://npmjs.org/jmitchell38488/koa-session-local
 [npm]: https://www.npmjs.com/
 [yarn]: https://yarnpkg.com/
 
