@@ -146,7 +146,7 @@ describe('Local storage', () => {
                     assert.equal(optSpy.get.callCount, 1);
                     assert.equal(store.size, 0);
                 })
-                .catch((e) => {assert.equal(e, 'Cannot resolve session')});
+                .catch((e) => {assert.equal(e.message, 'Cannot resolve session')});
         });
 
         it('session should renew existing session', async () => {

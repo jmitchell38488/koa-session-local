@@ -91,7 +91,7 @@ class LocalSessionStore {
         }
 
         // Wait, what happened?!
-        throw 'Cannot resolve session';
+        throw new Error('Cannot resolve session');
     }
 
     /**
