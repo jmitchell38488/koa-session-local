@@ -7,7 +7,7 @@
 [![node version][node-image]][node-url]
 [![npm download][download-image]][download-url]
 
->Local session storage for Koa sessions using async/await
+>Local session storage for Koa sessions using async/await v1.0.2
 
 [![NPM](https://nodei.co/npm/koa-session-local.svg?downloads=true)](https://nodei.co/npm/koa-session-local/)
 
