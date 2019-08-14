@@ -104,7 +104,7 @@ describe('Local storage', () => {
 
             optSpy = sinon.spy(opts, 'changed', ['get']);
 
-            store.sessions.push({created: Date.now(), key: key1});
+            store.sessions.set(key1, {created: Date.now(), key: key1});
             assert.equal(store.size, 1);
 
             await store.set(key1, data, ttl, opts);
@@ -122,7 +122,7 @@ describe('Local storage', () => {
 
             optSpy = sinon.spy(opts, 'rolling', ['get']);
 
-            store.sessions.push({created: Date.now(), key: key1});
+            store.sessions.set(key1, {created: Date.now(), key: key1});
             assert.equal(store.size, 1);
 
             await store.set(key1, data, ttl, opts);
@@ -159,7 +159,7 @@ describe('Local storage', () => {
             optSpy = sinon.spy(opts, 'renew', ['get']);
             let destroySpy = sinon.spy(store, 'destroy');
 
-            store.sessions.push({created: Date.now(), key: key1});
+            store.sessions.set(key1, {created: Date.now(), key: key1});
             assert.equal(store.size, 1);
 
             await store.set(key1, data, ttl, opts);
@@ -180,7 +180,7 @@ describe('Local storage', () => {
             optSpy = sinon.spy(opts, 'force', ['get']);
             let destroySpy = sinon.spy(store, 'destroy');
 
-            store.sessions.push({created: Date.now(), key: key1});
+            store.sessions.set(key1, {created: Date.now(), key: key1});
             assert.equal(store.size, 1);
 
             await store.set(key1, data, ttl, opts);
@@ -206,7 +206,7 @@ describe('Local storage', () => {
                 json: { views: 1, _expire: now + ttl }
             };
 
-            findSpy = sinon.spy(store.sessions, 'find');
+            findSpy = sinon.spy(store.sessions, 'get');
         });
 
         afterEach(() => {
@@ -221,7 +221,7 @@ describe('Local storage', () => {
             data.json._session = true;
             let getSpy = sinon.spy(Date, 'now');
 
-            store.sessions.push(data);
+            store.sessions.set(data.key, data);
             let session = await store.get(key1);
 
             assert(findSpy.calledOnce);
@@ -232,7 +232,7 @@ describe('Local storage', () => {
         it('should return session that has not expired', async () => {
             let getSpy = sinon.spy(Date, 'now');
 
-            store.sessions.push(data);
+            store.sessions.set(data.key, data);
             let session = await store.get(key1);
 
             assert(findSpy.calledOnce);
@@ -244,7 +244,7 @@ describe('Local storage', () => {
             let getSpy = sinon.spy(Date, 'now');
             data.json._expire -= 20 * 1000;
 
-            store.sessions.push(data);
+            store.sessions.set(data.key, data);
             let session = await store.get(key1);
 
             assert(findSpy.calledOnce);
@@ -263,11 +263,11 @@ describe('Local storage', () => {
     });
 
     describe('destroying a session', () => {
-        let getSpy;
-        let findSpy;
+        let delSpy;
 
         beforeEach(() => {
             store = new LocalSessionStore();
+            delSpy = sinon.spy(store.sessions, 'delete');
             let now = Date.now();
             data = {
                 created: now,
@@ -275,54 +275,46 @@ describe('Local storage', () => {
                 ttl: ttl,
                 json: { views: 1, _expire: now + ttl }
             };
-
-            findSpy = sinon.spy(store.sessions, 'find');
         });
 
         afterEach(() => {
             data = {};
             store = null;
-            getSpy = null;
-            findSpy = null;
+            delSpy = null;
         });
 
         it('should destroy found session', async () => {
-            store.sessions.push(data);
+            store.sessions.set(data.key, data);
             assert.equal(store.size, 1);
 
-            getSpy = sinon.spy(store.sessions, 'filter');
             await store.destroy(key1);
 
-            assert(getSpy.calledOnce);
+            assert(delSpy.calledOnce);
             assert.equal(store.size, 0);
         });
 
         it('should destroy found session, leave other sessions', async () => {
-            store.sessions.push(data);
+            store.sessions.set(data.key, data);
             assert.equal(store.size, 1);
 
-            store.sessions.push(Object.assign({}, data, {key: key2}));
+            store.sessions.set(key2, Object.assign({}, data, {key: key2}));
             assert.equal(store.size, 2);
-            assert.equal(store.sessions[0].key, key1);
-            assert.equal(store.sessions[1].key, key2);
 
-            getSpy = sinon.spy(store.sessions, 'filter');
             await store.destroy(key1);
 
-            assert(getSpy.calledOnce);
+            assert(delSpy.calledOnce);
             assert.equal(store.size, 1);
-            assert.equal(store.sessions[0].key, key2);
+            assert(store.get(key2) !== null);
         });
 
         it('should not destroy session if not found', async () => {
             data.key = key3;
-            store.sessions.push(data);
+            store.sessions.set(data.key, data);
             assert.equal(store.size, 1);
-
-            getSpy = sinon.spy(store.sessions, 'filter');
+            
             await store.destroy(key1);
 
-            assert(getSpy.calledOnce);
+            assert(delSpy.calledOnce);
             assert.equal(store.size, 1);
         });
     });

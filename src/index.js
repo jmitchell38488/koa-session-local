@@ -37,7 +37,7 @@ class LocalSessionStore {
 
     constructor() {
         // Initialize our sessions container
-        this.sessions = [];
+        this.sessions = new Map();
     }
 
     /**
@@ -49,7 +49,7 @@ class LocalSessionStore {
      */
     // eslint-disable-next-line
     async get(key, ttl, opts) {
-        const session = this.sessions.find(t => t.key === key);
+        const session = this.sessions.get(key);
 
         // Session-length session does not expire
         if (session && session.json._session) {
@@ -71,9 +71,9 @@ class LocalSessionStore {
     async set(key, json, ttl, opts) {
         // Changed means we just update, or create a new session
         if (opts.changed || opts.rolling) {
-            let session = this.sessions.find(t => t.key === key) || false;
+            let session = this.sessions.get(key);
             if (!session) {
-                this.sessions.push(LocalSessionStore.getNewSessionEntry(key, json, ttl));
+                this.sessions.set(key, LocalSessionStore.getNewSessionEntry(key, json, ttl));
                 return;
             }
 
@@ -86,7 +86,7 @@ class LocalSessionStore {
         // Force saving a new session no matter what
         if (opts.renew || opts.force) {
             await this.destroy(key);
-            this.sessions.push(LocalSessionStore.getNewSessionEntry(key, json, ttl));
+            this.sessions.set(key, LocalSessionStore.getNewSessionEntry(key, json, ttl));
             return;
         }
 
@@ -100,7 +100,7 @@ class LocalSessionStore {
      * @returns {Promise<void>} An empty promise that resolves on success, or failure on error
      */
     async destroy(key) {
-        this.sessions = this.sessions.filter(t => t.key !== key);
+        this.sessions.delete(key);
     }
 
     /**
@@ -124,7 +124,7 @@ class LocalSessionStore {
      * @returns {number}
      */
     get size() {
-        return this.sessions.length;
+        return this.sessions.size;
     }
 
 }
