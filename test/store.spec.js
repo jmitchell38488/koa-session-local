@@ -22,7 +22,7 @@ const stubCreator = (key, json, ttl, date = Date.now()) => sinon.stub(LocalSessi
     ttl: ttl
 });
 
-describe('Local storage', () => {
+describe('suite: Local storage', () => {
     let store;
     let data;
     let optSpy;
@@ -41,7 +41,7 @@ describe('Local storage', () => {
         optSpy = null;
     });
 
-    describe('constructor', () => {
+    describe('test: constructor', () => {
         it('Should return 0 sessions', () => {
             expect(store.size).to.equal(0);
         });
@@ -67,6 +67,7 @@ describe('Local storage', () => {
             assert.equal(store.probability, 0.05);
             assert.equal(store.maxlifetime, 60000);
             assert.equal(store.debug, null);
+            assert.equal(store.gcActive, false);
         });
 
         it('should call _verifyOpts', () => {
@@ -144,7 +145,7 @@ describe('Local storage', () => {
             assert.equal(store.debug, null);
         });
 
-        it('should not set a debug function', () => {
+        it('should set a debug function', () => {
             opts = {debug: console.log};
             store = new LocalSessionStore(opts);
 
@@ -153,7 +154,7 @@ describe('Local storage', () => {
         })
     });
 
-    describe('creating a session', () => {
+    describe('test: creating a session', () => {
         let creatorStub;
 
         beforeEach(() => {
@@ -292,7 +293,7 @@ describe('Local storage', () => {
         });
     });
 
-    describe('getting a session', () => {
+    describe('test: getting a session', () => {
         let getSpy;
         let findSpy;
 
@@ -373,7 +374,7 @@ describe('Local storage', () => {
         })
     });
 
-    describe('destroying a session', () => {
+    describe('test: destroying a session', () => {
         let delSpy;
 
         beforeEach(() => {
@@ -430,7 +431,7 @@ describe('Local storage', () => {
         });
     });
 
-    describe('it should return a new session template', () => {
+    describe('test: it should return a new session template', () => {
         let dateNowStub;
         let dateNow;
 
@@ -458,7 +459,7 @@ describe('Local storage', () => {
         });
     });
 
-    describe('garbage collection', () => {
+    describe('test: garbage collection', () => {
         let getSpy;
         let findSpy;
         let mathSpy;
@@ -500,6 +501,16 @@ describe('Local storage', () => {
         it('should not perform gc if gc is enabled but no sessions', () => {
             let opts = {gc: true};
             store = new LocalSessionStore(opts);
+
+            store._performGc();
+
+            assert(mathSpy.notCalled);
+        });
+
+        it('should not perform gc if another active gc is in progress', () => {
+            let opts = {gc: true};
+            store = new LocalSessionStore(opts);
+            store.gcActive = true;
 
             store._performGc();
 
@@ -553,6 +564,7 @@ describe('Local storage', () => {
             assert(dateSpy.calledOnce);
             assert(delSpy.notCalled);
             assert.equal(store.size, 1);
+            assert.equal(store.gcActive, false);
         });
 
         it('should perform gc if probability met, delete 1 session', () => {
@@ -574,6 +586,7 @@ describe('Local storage', () => {
             assert(dateSpy.calledOnce);
             assert(delSpy.calledOnce);
             assert.equal(store.size, 0);
+            assert.equal(store.gcActive, false);
         });
     });
 

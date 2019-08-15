@@ -1,3 +1,6 @@
+### v1.0.4
+    * Fixed a race condition where multiple garbage collections could be triggered
+
 ### v1.0.3
     * Added configurable garbage collection for expired sessions
 

@@ -7,7 +7,7 @@
 [![node version][node-image]][node-url]
 [![npm download][download-image]][download-url]
 
->Local session storage for Koa sessions using async/await v1.0.3
+>Local session storage for Koa sessions using async/await v1.0.4
 
 This is an implementation of the koa-session storage in local system memory. This is intended to be used as in-memory
 session storage for testing/development purposes, as none of the data is persisted to permanent storage.

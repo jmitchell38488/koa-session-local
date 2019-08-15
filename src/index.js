@@ -69,6 +69,7 @@ class LocalSessionStore {
         this.probability = opts.probability;
         this.maxlifetime = opts.maxlifetime;
         this.debug = (!!opts.debug && typeof opts.debug === 'function') ? opts.debug : null;
+        this.gcActive = false;
 
         // Initialize our sessions container
         this.sessions = new Map();
@@ -157,7 +158,7 @@ class LocalSessionStore {
      * @private
      */
     _performGc() {
-        if (!this.gc || this.sessions.size === 0) {
+        if (this.gcActive || !this.gc || this.sessions.size === 0) {
             return;
         }
 
@@ -167,6 +168,7 @@ class LocalSessionStore {
         }
 
         this._debug('performing garbage collection...');
+        this.gcActive = true;
         let count = 0;
         const start = new Date().getTime();
         const now = Date.now();
@@ -183,6 +185,7 @@ class LocalSessionStore {
             }
         });
 
+        this.gcActive = false;
         const time = new Date().getTime() - start;
         this._debug(`Finished garbage collection on ${count} session(s) in ${time}ms`);
     }
