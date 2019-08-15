@@ -2,6 +2,7 @@
 
 [![NPM version][npm-image]][npm-url]
 [![build status][travis-image]][travis-url]
+[![coverall status][coverall-image]][coverall-url]
 [![David deps][david-image]][david-url]
 [![David devDeps][david-dev-image]][david-dev-url]
 [![node version][node-image]][node-url]
@@ -142,6 +143,8 @@ app.use(session({
 [npm-url]: https://npmjs.org/package/koa-session-local
 [travis-image]: https://img.shields.io/travis/jmitchell38488/koa-session-local
 [travis-url]: https://travis-ci.com/jmitchell38488/koa-session-local
+[coverall-image]: https://coveralls.io/repos/github/jmitchell38488/koa-session-local/badge.svg?branch=master
+[coverall-url]: https://coveralls.io/github/jmitchell38488/koa-session-local?branch=master
 [david-image]: https://img.shields.io/david/jmitchell38488/koa-session-local.svg?style=flat-square
 [david-url]: https://david-dm.org/jmitchell38488/koa-session-local
 [david-dev-image]: https://img.shields.io/david/dev/jmitchell38488/koa-session-local.svg?style=flat-square&label=devDeps
