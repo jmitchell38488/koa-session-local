@@ -51,6 +51,106 @@ describe('Local storage', () => {
             expect(store.get).to.be.a('function');
             expect(store.set).to.be.a('function');
         });
+
+        it('should not throw an error', () => {
+            try {
+                store = new LocalSessionStore();
+                assert(store !== null);
+            } catch (e) {
+                // truly hacky bs way around this
+                assert.equal(false, true);
+            }
+        });
+
+        it('shold set default gc values', () => {
+            assert.equal(store.gc, false);
+            assert.equal(store.probability, 0.05);
+            assert.equal(store.maxlifetime, 60000);
+            assert.equal(store.debug, null);
+        });
+
+        it('should call _verifyOpts', () => {
+            let stub = sinon.stub(LocalSessionStore.prototype, '_verifyOpts').callsFake();
+            store = new LocalSessionStore();
+            assert(stub.calledOnce);
+            stub.restore();
+        });
+
+        it('should throw exception for invalid data', () => {
+            let opts = 'foo';
+            try {
+                store = new LocalSessionStore(opts);
+            } catch (e) {
+                assert(e instanceof TypeError);
+                assert.equal(e.message, 'options must be an object, invalid value provided');
+            }
+        });
+
+        it('should throw exception for invalid gc data', () => {
+            let opts = {gc: 'foo'};
+            try {
+                store = new LocalSessionStore(opts);
+            } catch (e) {
+                assert(e instanceof TypeError);
+                assert.equal(e.message, 'options.gc must be a boolean');
+            }
+        });
+
+        it('should throw exception for invalid probability data', () => {
+            let opts = {probability: 'foo'};
+            try {
+                store = new LocalSessionStore(opts);
+            } catch (e) {
+                assert(e instanceof TypeError);
+                assert.equal(e.message, 'options.probability must be a number');
+            }
+
+            opts = {gc: true, probability: 1};
+            try {
+                store = new LocalSessionStore(opts);
+            } catch (e) {
+                assert(e instanceof TypeError);
+                assert.equal(e.message, 'options.probability must be a number equal to or less than 1 and greater than 0 when options.gc is enabled');
+            }
+
+            opts = {gc: true, probability: 0};
+            try {
+                store = new LocalSessionStore(opts);
+            } catch (e) {
+                assert(e instanceof TypeError);
+                assert.equal(e.message, 'options.probability must be a number equal to or less than 1 and greater than 0 when options.gc is enabled');
+            }
+        });
+
+        it('should throw exception for invalid maxlifetime data', () => {
+            let opts = {maxlifetime: 'foo'};
+            try {
+                store = new LocalSessionStore(opts);
+            } catch (e) {
+                assert(e instanceof TypeError);
+                assert.equal(e.message, 'options.maxlifetime must be a number');
+            }
+
+            opts = {gc: true, maxlifetime: -1};
+            try {
+                store = new LocalSessionStore(opts);
+            } catch (e) {
+                assert(e instanceof TypeError);
+                assert.equal(e.message, 'options.maxlifetime must be a number greater than 0 when options.gc is enabled');
+            }
+        });
+
+        it('should not set a debug function', () => {
+            assert.equal(store.debug, null);
+        });
+
+        it('should not set a debug function', () => {
+            opts = {debug: console.log};
+            store = new LocalSessionStore(opts);
+
+            assert.equal(store.debug, opts.debug);
+            assert.equal(typeof store.debug, 'function');
+        })
     });
 
     describe('creating a session', () => {
@@ -260,6 +360,17 @@ describe('Local storage', () => {
             assert(getSpy.notCalled);
             assert.equal(session, null);
         });
+
+        it('should call gc function', async () => {
+            let getSpy = sinon.spy(Date, 'now');
+            let spy = sinon.spy(store, '_performGc');
+
+            store.sessions.set(data.key, data);
+            await store.get(key1);
+            assert(getSpy.calledOnce);
+
+            spy.restore();
+        })
     });
 
     describe('destroying a session', () => {
@@ -344,6 +455,151 @@ describe('Local storage', () => {
             let session = LocalSessionStore.getNewSessionEntry(data.key, data.json, data.ttl);
             assert(dateNowStub.calledOnce);
             assert.equal(JSON.stringify(session), JSON.stringify(data));
-        })
-    })
+        });
+    });
+
+    describe('garbage collection', () => {
+        let getSpy;
+        let findSpy;
+        let mathSpy;
+        let dateSpy;
+
+        beforeEach(() => {
+            let now = Date.now();
+            mathSpy = sinon.spy(Math, 'random');
+            dateSpy = sinon.spy(Date, 'now');
+            data = {
+                created: now,
+                key: key1,
+                ttl: ttl,
+                json: { views: 1, _expire: now + ttl }
+            };
+        });
+
+        afterEach(() => {
+            data = {};
+            store = null;
+            getSpy = null;
+            findSpy = null;
+
+            Math.random.restore();
+            Date.now.restore();
+            mathSpy = null;
+            dateSpy = null;
+        });
+
+        it('should not perform gc if gc is disabled', () => {
+            let opts = {gc: false};
+            store = new LocalSessionStore(opts);
+
+            store._performGc();
+
+            assert(mathSpy.notCalled);
+        });
+
+        it('should not perform gc if gc is enabled but no sessions', () => {
+            let opts = {gc: true};
+            store = new LocalSessionStore(opts);
+
+            store._performGc();
+
+            assert(mathSpy.notCalled);
+        });
+
+        it('should not perform gc if probability < Math.random', () => {
+            let opts = {gc: true, probability: 0.0000001};
+            store = new LocalSessionStore(opts);
+            store.sessions.set(key1, data);
+
+            let dbgSpy = sinon.spy(store, '_debug');
+            store._performGc();
+
+            assert(dbgSpy.notCalled);
+            assert(mathSpy.calledOnce);
+            assert(dateSpy.notCalled);
+        });
+
+        it('should perform gc if probability met, delete 0 sessions', () => {
+            let opts = {gc: true, probability: 1};
+            store = new LocalSessionStore(opts);
+            store.sessions.set(key1, data);
+
+            let dbgSpy = sinon.spy(store, '_debug');
+            let delSpy = sinon.spy(store.sessions, 'delete');
+
+            store._performGc();
+
+            assert(dbgSpy.calledTwice);
+            assert(mathSpy.calledOnce);
+            assert(dateSpy.calledOnce);
+            assert(delSpy.notCalled);
+            assert.equal(store.size, 1);
+        });
+
+        it('should perform gc if probability met, not delete _session:true sessions', () => {
+            let opts = {gc: true, probability: 1};
+            store = new LocalSessionStore(opts);
+
+            data.json._session = true;
+            store.sessions.set(key1, data);
+
+            let dbgSpy = sinon.spy(store, '_debug');
+            let delSpy = sinon.spy(store.sessions, 'delete');
+
+            store._performGc();
+
+            assert(dbgSpy.calledTwice);
+            assert(mathSpy.calledOnce);
+            assert(dateSpy.calledOnce);
+            assert(delSpy.notCalled);
+            assert.equal(store.size, 1);
+        });
+
+        it('should perform gc if probability met, delete 1 session', () => {
+            let opts = {gc: true, probability: 1, maxlifetime: 1};
+            store = new LocalSessionStore(opts);
+
+            data.created -= 90 * 1000;
+            data.json._expire = data.created;
+
+            store.sessions.set(key1, data);
+
+            let dbgSpy = sinon.spy(store, '_debug');
+            let delSpy = sinon.spy(store.sessions, 'delete');
+
+            store._performGc();
+
+            assert(dbgSpy.calledTwice);
+            assert(mathSpy.calledOnce);
+            assert(dateSpy.calledOnce);
+            assert(delSpy.calledOnce);
+            assert.equal(store.size, 0);
+        });
+    });
+
+    describe('test: _debug', () => {
+        let logStub;
+
+        beforeEach(() => {
+            logStub = sinon.stub();
+        });
+
+        afterEach(() => {
+            store = null;
+            logStub = null;
+        });
+
+        it('should not log if not enabled', () => {
+            store = new LocalSessionStore();
+            store._debug('foo');
+            assert(logStub.notCalled);
+        });
+
+        it('should log if not enabled', () => {
+            store = new LocalSessionStore({debug: logStub});
+            store._debug('foo');
+            assert(logStub.calledWith('foo'));
+            assert(logStub.calledOnce);
+        });
+    });
 });

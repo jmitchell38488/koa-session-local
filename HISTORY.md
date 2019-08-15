@@ -1,3 +1,6 @@
+### v1.0.3
+    * Added configurable garbage collection for expired sessions
+
 ### v1.0.2
     * Changed store type from array to Map
 
