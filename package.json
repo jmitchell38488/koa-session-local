@@ -6,7 +6,8 @@
   "scripts": {
     "test": "node node_modules/mocha/bin/_mocha -- test/*",
     "lint": "eslint src",
-    "coverage": "npm run lint && nyc --reporter=text mocha"
+    "coverage": "npm run lint && nyc --reporter=text mocha",
+    "nyc-coverage": "nyc npm test && nyc report --reporter=text-lcov | coveralls"
   },
   "repository": "jmitchell38488/koa-session-local",
   "keywords": [
@@ -42,6 +43,7 @@
     "babel-jest": "^24.8.0",
     "chai": "^4.2.0",
     "co-mocha": "^1.2.2",
+    "coveralls": "^3.0.6",
     "dirty-chai": "^2.0.1",
     "eslint": "^6.1.0",
     "eslint-plugin-node": "^9.1.0",

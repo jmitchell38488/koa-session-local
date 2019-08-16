@@ -16,3 +16,11 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - g++-4.8
+
+notifications:
+    email:
+        recipients:
+            - jmitchell38488@gmail.com
+
+script: "npm test"
+after_success: "npm run nyc-coverage"
